@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <title>Joke Browser App</title>
+</head>
+<body>
+    <div>
+        <button id="back">Back</button>
+        <button id="forward">Forward</button>
+        <button id="refresh">Refresh</button>
+
+        <input type="text" id="urlInput" placeholder="Enter URL here" style="width: 300px;" />
+    
+        <button onclick="submitUrl()">Go</button>
+    </div>
+    <img id="stream" style="border: 1px solid black; width: 1280px; height: 720px;" />
+    <script>
+        const img = document.getElementById('stream');
+
+        // Fetch the window size from the backend
+        fetch('http://localhost:5000/get_window_size')
+            .then(response => response.json())
+            .then(data => {
+                // Set the <img> element to match the browser size
+                img.style.width = `${data.width}px`;
+                img.style.height = `${data.height}px`;
+
+                console.log(data.width)
+
+                // Set the video feed source
+                img.src = 'http://localhost:5000/video_feed';
+            });
+        
+        function get_current_url() {
+            fetch('http://localhost:5000/get_current_url')
+                .then(response => response.json())
+                .then(data => {
+                    // Update the input box with the current URL
+                    document.getElementById('urlInput').value = data.current_url;
+                })
+                .catch(error => {
+                    console.error("Error fetching the current URL:", error);
+                });
+        }
+        get_current_url()
+
+        // Display the video stream
+        const socket = io.connect('http://127.0.0.1:5000');
+
+        // Connect to the WebSocket and start streaming
+        socket.emit('start_stream');
+
+        // Listen for frames from the WebSocket
+        socket.on('frame', function (frame) {
+            const imageElement = document.getElementById('stream');
+            // Set the src of the image element
+            imageElement.src = 'data:image/jpeg;base64,' + frame;
+        });
+
+        // Send click coordinates to the backend
+        const imageElement = document.getElementById('stream');
+        let clickTimeout = null;
+        imageElement.addEventListener('click', (e) => {
+            if (clickTimeout) return;
+
+            const rect = imageElement.getBoundingClientRect();
+            const x = e.clientX - rect.left; // X-coordinate of the click
+            const y = e.clientY - rect.top;  // Y-coordinate of the click
+
+            console.log("Click at: " + x + " and " + y)
+
+            // Send the click coordinates and video element size to the backend
+            fetch('http://localhost:5000/click', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    x: x, 
+                    y: y, 
+                    frontend_width: rect.width,  // Frontend video width
+                    frontend_height: rect.height // Frontend video height
+                })
+            });
+
+            // Set a timeout to prevent further clicks
+            clickTimeout = setTimeout(() => {
+                clickTimeout = null; // Allow clicks again after the timeout
+            }, 1500); // 2 debounce time
+            get_current_url()
+        });
+
+        // Handle right-click event (context-click)
+        imageElement.addEventListener('contextmenu', (e) => {
+            e.preventDefault();  // Prevent the right-click context menu
+            console.log("Right-click disabled on the image");
+        });
+
+        // Send keyboard input to the backend
+        document.addEventListener('keydown', (e) => {
+            fetch('http://localhost:5000/type', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: e.key }),
+            })
+            .then(response => console.log(response.data))
+            .then(data => console.log('Keypress registered:', data))
+            .catch(err => console.error('Error sending keypress:', err));
+        });
+
+        // Detect mouse wheel scroll
+        document.addEventListener('wheel', (e) => {
+            const deltaX = e.deltaX; // Horizontal scroll amount
+            const deltaY = e.deltaY; // Vertical scroll amount
+
+            // Send the scroll data to the backend
+            fetch('http://localhost:5000/scroll', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ deltaX, deltaY })
+            }).catch(err => console.error('Error sending scroll event:', err));
+        });
+
+        // Button actions
+        document.getElementById('back').addEventListener('click', () => {
+            fetch('http://localhost:5000/back', { method: 'POST' });
+            get_current_url()
+        });
+
+        document.getElementById('forward').addEventListener('click', () => {
+            fetch('http://localhost:5000/forward', { method: 'POST' });
+            get_current_url()
+        });
+
+        document.getElementById('refresh').addEventListener('click', () => {
+            fetch('http://localhost:5000/refresh', { method: 'POST' });
+            get_current_url()
+        });
+
+        function submitUrl() {
+            const url = document.getElementById('urlInput').value;
+            
+            // Send the URL to the backend using a POST request
+            fetch('/navigate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Navigation successful:', data);
+            })
+            .catch(error => {
+                console.error('Error navigating:', error);
+            });
+        }
+    </script>
+</body>
+</html>
