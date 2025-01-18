@@ -1,3 +1,4 @@
+import os
 import time
 import threading
 from flask import Flask, jsonify, render_template, request
@@ -10,8 +11,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "http://localhost:5000"])
-socketio = SocketIO(app=app, async_mode='threading', cors_allowed_origins=["http://localhost:5173", "http://localhost:5000"])
+CORS(app, origins=[os.getenv("ALLOWED_ORIGIN"), "http://localhost:5000"])
+socketio = SocketIO(app=app, async_mode='threading', cors_allowed_origins=[os.getenv("ALLOWED_ORIGIN"), "http://localhost:5000"])
 
 window_width = 1280
 window_height = 800
@@ -27,7 +28,7 @@ options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 driver = webdriver.Chrome(options=options)
 # driver.set_window_size(window_width, window_height)
 
-home = "http://localhost:5173"
+home = os.getenv("HOME")
 
 def generate_frames():
     frame_rate = 30  # Target frame rate
