@@ -3,6 +3,7 @@ import { MenuItem, Button, Input, MenuRoot, MenuTrigger, MenuContent } from '@ch
 import { toaster } from "@/components/ui/toaster"
 
 import { LuSettings } from 'react-icons/lu';
+import { BACKEND_API_URL } from '@/constants';
 
 const SetHomeMenu = () => {
   const [newHome, setNewHome] = useState('');
@@ -23,7 +24,7 @@ const SetHomeMenu = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/set_home', {
+      const response = await fetch(BACKEND_API_URL+'set_home', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

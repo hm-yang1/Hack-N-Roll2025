@@ -2,12 +2,14 @@ import { Skeleton } from '@chakra-ui/react/skeleton';
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import { throttle } from "lodash";
+import { BACKEND_API_URL } from '@/constants';
 
 
 interface WindowSize {
   width: number;
   height: number;
 }
+
 
 const VideoStream: React.FC = () => {
   const imgRef = useRef<HTMLImageElement>(null);
@@ -16,7 +18,7 @@ const VideoStream: React.FC = () => {
   // Function to set the stream image size based on window size
   const setStreamImageSize = async () => {
     try {
-      const response = await fetch('http://localhost:5000/get_window_size');
+      const response = await fetch(BACKEND_API_URL + 'get_window_size');
       const data: WindowSize = await response.json();
       if (imgRef.current) {
         imgRef.current.style.width = `${data.width}px`;
@@ -35,7 +37,7 @@ const VideoStream: React.FC = () => {
     setStreamImageSize();
 
     // Set up the WebSocket for streaming
-    const socket = io.connect('http://127.0.0.1:5000/');
+    const socket = io.connect(BACKEND_API_URL);
 
     // Start the stream on connection
     socket.emit('start_stream');
@@ -66,7 +68,7 @@ const VideoStream: React.FC = () => {
 
       console.log(`Click at: ${x}, ${y}`);
       // Send the click coordinates to the backend
-      await fetch('http://localhost:5000/click', {
+      await fetch(BACKEND_API_URL+'click', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,7 +91,7 @@ const VideoStream: React.FC = () => {
   };
 
   const handleKeys = (e: KeyboardEvent) => {
-    fetch('http://localhost:5000/type', {
+    fetch(BACKEND_API_URL+'type', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: e.key }),
@@ -104,7 +106,7 @@ const VideoStream: React.FC = () => {
     const deltaY = e.deltaY;
 
     // Send scroll data to the backend
-    fetch('http://localhost:5000/scroll', {
+    fetch(BACKEND_API_URL+'scroll', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deltaX, deltaY }),

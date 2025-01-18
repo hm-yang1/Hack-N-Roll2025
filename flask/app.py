@@ -11,8 +11,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 app = Flask(__name__)
-CORS(app, origins=[os.getenv("ALLOWED_ORIGIN"), "http://localhost:5000"])
-socketio = SocketIO(app=app, async_mode='threading', cors_allowed_origins=[os.getenv("ALLOWED_ORIGIN"), "http://localhost:5000"])
+CORS(app, origins=[os.getenv("ALLOWED_ORIGIN"), "http://localhost:5173", "http://localhost:500"])
+socketio = SocketIO(app=app, async_mode='threading', cors_allowed_origins=[os.getenv("ALLOWED_ORIGIN"), "http://localhost:5000", "http://localhost:5173"])
 
 window_width = 1280
 window_height = 800
@@ -218,4 +218,4 @@ if __name__ == '__main__':
     driver.get(home)
 
     # Start Flask
-    app.run(host="0.0.0.0", port="5000", debug=True)
+    app.run(host="0.0.0.0", port="5173", debug=True)

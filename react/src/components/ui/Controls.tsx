@@ -4,6 +4,7 @@ import { LuArrowLeft, LuArrowRight, LuLogIn, LuRefreshCcw } from "react-icons/lu
 import { RiRestartFill } from 'react-icons/ri';
 import { Tooltip } from './tooltip';
 import Settings from './Settings';
+import { BACKEND_API_URL } from '@/constants';
 
 // Controls Component
 const Controls: React.FC = () => {
@@ -17,13 +18,13 @@ const Controls: React.FC = () => {
     const [restartLoad, setRestartLoad] = useState(false)
     
     useEffect(() => {
-        fetch('http://localhost:5000/get_window_size')
+        fetch(BACKEND_API_URL+'get_window_size')
             .then(response => response.json())
             .then(data => {
                 setWidth(data.width)
             });
         // Fetch current URL from the backend on mount
-        fetch('http://localhost:5000/get_current_url')
+        fetch(BACKEND_API_URL+'get_current_url')
             .then(response => response.json())
             .then(data => setCurrentUrl(data.current_url));
     }, []);
@@ -32,7 +33,7 @@ const Controls: React.FC = () => {
         setBackLoad(true)
         try {
             // Wait for the fetch request to complete
-            await fetch('http://localhost:5000/back', { method: 'POST' });
+            await fetch(BACKEND_API_URL+'back', { method: 'POST' });
             // Optionally call updateCurrentUrl() if it's necessary after the fetch request
             
           } catch (error) {
@@ -46,7 +47,7 @@ const Controls: React.FC = () => {
     const handleForward = async () => {
         setForwardLoad(true)
         try {
-            await fetch('http://localhost:5000/forward', { method: 'POST' });
+            await fetch(BACKEND_API_URL+'forward', { method: 'POST' });
         } catch(error) {
             console.error("Error occurred during back request:", error);
           } finally {
@@ -58,7 +59,7 @@ const Controls: React.FC = () => {
     const handleRefresh = async () => {
         setRefreshLoad(true)
         try {
-            await fetch('http://localhost:5000/refresh', { method: 'POST' })
+            await fetch(BACKEND_API_URL+'refresh', { method: 'POST' })
             .then(response => response.json())
             .then(data => console.log('Navigation successful:', data))
             .catch(error => console.error('Error navigating:', error));;
@@ -76,7 +77,7 @@ const Controls: React.FC = () => {
         const url = currentUrl
 
         try {
-        await fetch('http://localhost:5000/navigate', {
+        await fetch(BACKEND_API_URL+'navigate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url })
@@ -93,7 +94,7 @@ const Controls: React.FC = () => {
     };
 
     const updateCurrentUrl = () => {
-    fetch('http://localhost:5000/get_current_url')
+    fetch(BACKEND_API_URL+'get_current_url')
         .then(response => response.json())
         .then(data => setCurrentUrl(data.current_url));
     };
@@ -101,7 +102,7 @@ const Controls: React.FC = () => {
     const handleRestart = async () => {
         setRestartLoad(true)
         try {
-            await fetch('http://localhost:5000/restart')
+            await fetch(BACKEND_API_URL+'restart')
         } catch (error) {
             console.error("Error occurred during back request:", error);
         } finally {
