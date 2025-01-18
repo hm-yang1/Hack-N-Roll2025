@@ -48,7 +48,7 @@
         get_current_url()
 
         // Display the video stream
-        const socket = io.connect('http://127.0.0.1:5000');
+        const socket = io.connect('http://127.0.0.1:5000/');
 
         // Connect to the WebSocket and start streaming
         socket.emit('start_stream');

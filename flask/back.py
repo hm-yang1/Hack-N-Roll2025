@@ -1,4 +1,5 @@
 import time
+import threading
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
@@ -9,11 +10,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 app = Flask(__name__)
-CORS(app, origins=['*'])
-socketio = SocketIO(app)
+CORS(app, origins=["http://localhost:5173", "http://localhost:5000"])
+socketio = SocketIO(app=app, async_mode='threading', cors_allowed_origins=["http://localhost:5173", "http://localhost:5000"])
 
 window_width = 1280
-window_height = 720
+window_height = 800
 options = webdriver.ChromeOptions()
 # options.add_argument("--disable-gpu")
 options.add_argument("--headless")
@@ -26,8 +27,10 @@ options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 driver = webdriver.Chrome(options=options)
 # driver.set_window_size(window_width, window_height)
 
+home = "http://localhost:5173"
+
 def generate_frames():
-    frame_rate = 15  # Target frame rate
+    frame_rate = 30  # Target frame rate
     frame_interval = 1 / frame_rate  # Time between frames
 
     while True:
@@ -182,9 +185,36 @@ def get_current_url():
     # Return the current URL as a JSON response
     return jsonify({'current_url': current_url})
 
+@app.route('/restart', methods=['GET'])
+def restart():
+    global driver
+    
+    driver = webdriver.Chrome(options=options)
+    driver.get(home)
+    return jsonify({'message': 'success'})
+
+@app.route('/set_home', methods=['POST'])
+def set_home():
+    global home
+    
+    try:
+        # Get the URL from the request data
+        data = request.json
+        new_home = data.get('new_home')
+
+        if not new_home:
+            return jsonify({'error': 'No HOME provided'}), 400
+        
+        home = new_home
+        
+        return jsonify({'message': f'Changed home to {new_home}'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
 if __name__ == '__main__':
     # Start Selenium
-    driver.get('https://bing.com')
+    driver.get(home)
 
     # Start Flask
-    app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+    app.run(host="0.0.0.0", port="5000", debug=True)
