@@ -11,7 +11,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 app = Flask(__name__)
-print(os.getenv("ALLOWED_ORIGIN"))
 CORS(app)
 socketio = SocketIO(app=app, async_mode='threading', cors_allowed_origins=[os.getenv("ALLOWED_ORIGIN"), "http://localhost:5000", "http://localhost:5173"])
 
@@ -29,7 +28,7 @@ options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 driver = webdriver.Chrome(options=options)
 # driver.set_window_size(window_width, window_height)
 
-home = os.getenv("HOME")
+home = "https://youtube.com"
 
 def generate_frames():
     frame_rate = 30  # Target frame rate
