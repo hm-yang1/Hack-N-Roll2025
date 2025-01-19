@@ -18,7 +18,7 @@ const VideoStream: React.FC = () => {
   // Function to set the stream image size based on window size
   const setStreamImageSize = async () => {
     try {
-      const response = await fetch(BACKEND_API_URL + 'get_window_size');
+      const response = await fetch(BACKEND_API_URL + '/get_window_size');
       const data: WindowSize = await response.json();
       if (imgRef.current) {
         imgRef.current.style.width = `${data.width}px`;
@@ -68,7 +68,7 @@ const VideoStream: React.FC = () => {
 
       console.log(`Click at: ${x}, ${y}`);
       // Send the click coordinates to the backend
-      await fetch(BACKEND_API_URL+'click', {
+      await fetch(BACKEND_API_URL+'/click', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -91,7 +91,7 @@ const VideoStream: React.FC = () => {
   };
 
   const handleKeys = (e: KeyboardEvent) => {
-    fetch(BACKEND_API_URL+'type', {
+    fetch(BACKEND_API_URL+'/type', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: e.key }),
@@ -106,7 +106,7 @@ const VideoStream: React.FC = () => {
     const deltaY = e.deltaY;
 
     // Send scroll data to the backend
-    fetch(BACKEND_API_URL+'scroll', {
+    fetch(BACKEND_API_URL+'/scroll', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deltaX, deltaY }),
