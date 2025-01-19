@@ -2,7 +2,7 @@
 # Start Flask backend server
 echo "Starting Flask backend..."
 cd /Users/hm/Documents/GitHub/Hack-N-Roll2025/flask
-python3 -m pip install -r requriements.txt
+python3 -m pip install -r requirements.txt
 python3 back.py &
 # Start React frontend server
 echo "Starting React frontend..."

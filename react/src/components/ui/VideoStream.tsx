@@ -41,10 +41,10 @@ const VideoStream: React.FC = () => {
 
     // Start the stream on connection
     socket.emit('start_stream');
-    setLoading(false);
 
     // Listen for incoming frames and update the image element
     socket.on('frame', (frame: string) => {
+      setLoading(false);
       if (imgRef.current) {
         imgRef.current.src = `data:image/jpeg;base64,${frame}`;
       }
